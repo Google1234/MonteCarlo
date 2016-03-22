@@ -6,7 +6,7 @@
         接受拒绝采样Monte_Carlo_Acceptance_Rejection_Sample
         重要性采样
 '''
-
+gggg
 from random import *
 import math
 class Monte_Carlo_Integral:
