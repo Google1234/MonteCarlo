@@ -22,6 +22,7 @@ class Monte_Carlo_Integral:
     #可以更改为需要的函数
     def function(self,x):
         return math.atan(x)/(x**2+x*math.sin(x))
+        #return x**2
     def integral(self):
         array=[0.0 for i in range(self.numbers)]
         a=Random()
@@ -93,8 +94,14 @@ class Monte_Carlo_Acceptance_Rejection_Sample:
         self.start=start
         self.stop=stop
     #可以更改为需要的函数
+    #示例用的为正态分布N(1,1)
     def function(self,x):
-        return x/2
+        mean=1
+        s=1#标准差
+        if x>self.start and x<self.stop :
+            return (math.exp(-((x-mean)**2)/(2*(s**2))))/(s*(math.sqrt(2*math.pi)))
+        else :
+            return 0
     #更改成函数的积分表达式
     def function_integral_by_input(self):
         #method 1：需要输入函数的积分形式，准确
@@ -140,26 +147,50 @@ class Monte_Carlo_Acceptance_Rejection_Sample:
                 #x=a.uniform(self.start,self.stop)
                 x=a.gauss(0,2)
                 u=a.random()
-                if u<(self.function(x)/k*(1/(self.stop-self.start))):
+                if u<(self.function(x)/(k*(math.exp(-((x-0)**2)/(2*(2**2))))/(2*(math.sqrt(2*math.pi))))):#配套更改
                     array[i]=x
                     break
         return array
 
-test=Monte_Carlo_Integral(10000000,0,1)
-test.integral()
+#积分测试
+#test=Monte_Carlo_Integral(10000,0,1)
+#test.integral()
 
-'''
-Means: 13.138739162029212
-Variance: 16739881.177172963
-Std Variance: 4.091439988216003
+#接受拒绝采样测试
+#测试函数 p N(1,1) q N(0,4)
+numbers=100000
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+class guass:
+    mean=0
+    s=0
+    def __init__(self,mean,s):
+        self.mean=mean
+        self.s=s
+    def function(self,x):
+        result=[0 for i in range(len(x))]
+        for i in range(len(x)):
+            result[i]=(math.exp(-((x[i]-self.mean)**2)/(2*(self.s**2))))/(self.s*(math.sqrt(2*math.pi)))
+        return result
+x = np.linspace(-4, 4, 10000)
+math1=guass(1,1)
+math2=guass(0,2)
+y = math1.function(x)
+z =math2.function(x)
+plt.figure(figsize=(8,4))
+plt.plot(x,y,label="$N(1,1)$",color="red",linewidth=2)
+plt.plot(x,z,"b--",label="$N(0,2)$")
+plt.xlabel("Time(s)")
+plt.ylabel("Volt")
+plt.title("PyPlot First Example")
+plt.ylim(0,1)
+a=Monte_Carlo_Acceptance_Rejection_Sample(0,4)
+data =a.sample(numbers)
+bins = np.linspace(-4, 4, 100) #浮点数版本的range
+plt.hist(data, bins,normed=1, histtype='stepfilled')
+plt.legend()
+plt.show()
 
-Means: 6.551904940829836
-Variance: 177389.1088770188
-Std Variance: 0.4211758645471257
 
-Means: 13.203920817423551
-Variance: 22765517.720458716
-Std Variance: 4.771322428893138
 
-效果并不好怎么办 函数x-->0时，值非常大
-'''
